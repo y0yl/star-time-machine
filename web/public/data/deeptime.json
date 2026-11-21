@@ -1,0 +1,1 @@
+{"t0_myr": -12.0, "step_myr": 0.05000000000000071, "n": 481, "layout": "per row: A(9, row-major) | B(9) | sun_gc(3); float64 little-endian", "model": "linearised motion relative to the Sun's orbit in MWPotential2014 (galpy), see stm/galaxy.py"}

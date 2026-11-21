@@ -1,0 +1,15 @@
+{
+ "log_min": -1.0,
+ "log_max": 7.0,
+ "g_cut": 12.0,
+ "units": "G=0 stars per steradian",
+ "faces": "OpenGL order +X,-X,+Y,-Y,+Z,-Z; ICRS axes",
+ "coverage": 0.9999739329020182,
+ "color": "B channel: bp_rp = -0.6 + 0.02*B",
+ "healpix_level": 10,
+ "sizes": [
+  256,
+  1024,
+  2048
+ ]
+}
