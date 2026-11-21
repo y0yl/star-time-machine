@@ -1,0 +1,42 @@
+# 星空的时间机器 — 赛事服务器（裸 IP、无域名、纯 HTTP，站点在根路径）
+:80 {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# static fast path: octree nodes are pre-compressed with brotli
+	@node path_regexp node ^/api/nodes/(\d+)$
+	handle @node {
+		@unfiltered not query f=*
+		handle @unfiltered {
+			root * /srv/stm/data/build/octree/nodes
+			rewrite * /{re.node.1}.bin
+			header Cache-Control "public, max-age=86400"
+			file_server {
+				precompressed br
+			}
+		}
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle /ws/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle /s/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+	handle {
+		root * /srv/stm/web/dist
+		@assets path /assets/* /fonts/* /data/*
+		header @assets Cache-Control "public, max-age=604800"
+		try_files {path} /index.html
+		file_server {
+			precompressed br gzip
+		}
+	}
+}

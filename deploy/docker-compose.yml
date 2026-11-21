@@ -1,0 +1,29 @@
+# Alternative to systemd + host Caddy: two containers, app memory <= 3 GB (4-core / 4 GB host).
+services:
+  app:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    environment:
+      STM_ROOT_PATH: ${STM_SUBPATH:-}
+      STM_DUCKDB_MEMORY: 1GB
+      STM_DUCKDB_THREADS: "4"
+      STM_ORBIT_WORKERS: "2"
+      MALLOC_ARENA_MAX: "2"
+    volumes:
+      - ../data/build:/srv/stm/data/build
+    mem_limit: 3g
+    restart: always
+  proxy:
+    image: caddy:2
+    ports: ["80:80", "443:443"]
+    environment:
+      STM_DOMAIN: ${STM_DOMAIN:-localhost}
+      STM_SUBPATH: ${STM_SUBPATH:-}
+    volumes:
+      - ./Caddyfile.docker:/etc/caddy/Caddyfile:ro
+      - ../web/dist:/srv/stm/web/dist:ro
+      - ../data/build/octree/nodes:/srv/stm/data/build/octree/nodes:ro
+      - caddy_data:/data
+    mem_limit: 80m
+    restart: always
+volumes:
+  caddy_data:

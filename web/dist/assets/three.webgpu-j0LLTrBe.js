@@ -1,0 +1,1 @@
+export{Uo as Vector2}from"./app-BaYf3iQU.js";

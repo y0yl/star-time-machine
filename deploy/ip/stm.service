@@ -1,0 +1,32 @@
+# systemd unit for the application server. Memory is capped for the whole
+# service (app + DuckDB + orbit workers) so the 3 GB application budget on the
+# 4-core / 4 GB host holds, leaving ~1 GB for the OS, Caddy and page cache.
+[Unit]
+Description=星空的时间机器 (FastAPI)
+After=network-online.target
+
+[Service]
+Type=simple
+User=stm
+WorkingDirectory=/srv/stm
+EnvironmentFile=-/etc/stm.env
+Environment=PYTHONUNBUFFERED=1
+Environment=STM_DUCKDB_MEMORY=1GB
+Environment=STM_DUCKDB_THREADS=4
+Environment=STM_ORBIT_WORKERS=2
+# glibc keeps one malloc arena per thread; capping them stops RSS creeping up
+# under many concurrent requests
+Environment=MALLOC_ARENA_MAX=2
+ExecStart=/usr/bin/python3 -m uvicorn server.app:app --host 127.0.0.1 --port 8787 --workers 1 --proxy-headers
+Restart=always
+RestartSec=2
+MemoryMax=3G
+MemoryHigh=2800M
+TasksMax=256
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/srv/stm/data/build
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
